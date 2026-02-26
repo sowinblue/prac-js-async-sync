@@ -256,3 +256,69 @@ document.getElementById('error-btn').addEventListener('click', () => {
     log("MAIN", "▶ ERROR HANDLING — Promise.all vs allSettled");
     runErrorHandling();
 });
+
+
+// ─────────────────────────────────────────────────────────────
+// 4. MEMORY LEAK 섹션: 메모리 누수 시뮬레이터 (setInterval)
+// 핵심: setInterval을 중단(clearInterval)하지 않거나, 
+//       참조를 끊지 않으면 가비지 컬렉터(GC)가 메모리를 회수하지 못한다.
+// ─────────────────────────────────────────────────────────────
+
+let leakIntervalId = null; // setInterval ID를 저장할 변수
+let leakDataStack = [];    // 메모리 누수를 유도할 거대 데이터 배열
+
+async function runMemoryLeakSimulator() {
+    const statusDisplay = document.getElementById('leak-status');
+    const countDisplay = document.getElementById('leak-count');
+    
+    // [Error Handling] 이미 실행 중이라면 중복 실행 방지
+    if (leakIntervalId !== null) {
+        log("LEAK", "⚠️ 이미 시뮬레이터가 작동 중입니다.");
+        alert("이미 시뮬레이터가 실행 중입니다! 먼저 정지해 주세요.");
+        return;
+    }
+
+    log("LEAK", "===== 시뮬레이션 시작: 메모리 누수 유도 =====");
+    statusDisplay.innerText = "Running (Memory Leaking...)";
+    statusDisplay.style.color = "#c00";
+
+    // 0.5초마다 무거운 데이터를 생성하여 배열에 추가 (연결 고리를 유지)
+    leakIntervalId = setInterval(() => {
+        // 아주 큰 문자열 데이터 생성 (메모리 점유 유도)
+        const heavyData = new Array(100000).fill("🚨 Memory Leak Data 🚨").join("");
+        leakDataStack.push(heavyData);
+
+        log("LEAK", `데이터 누적 중... 현재 개수: ${leakDataStack.length}`);
+        countDisplay.innerText = `누적 데이터: ${leakDataStack.length}개`;
+        
+        // 참고: 여기서 leakDataStack은 전역에 있으므로 
+        // 이 함수가 끝나도 GC가 메모리를 회수하지 못함 (참조가 살아있음)
+    }, 500);
+}
+
+function stopAndCleanupMemory() {
+    const statusDisplay = document.getElementById('leak-status');
+    
+    if (leakIntervalId === null) {
+        log("LEAK", "❌ 정지할 프로세스가 없습니다.");
+        return;
+    }
+
+    // 1. 알람 끄기: 활성화된 프로세스(setInterval)를 명시적으로 종료
+    clearInterval(leakIntervalId);
+    leakIntervalId = null;
+    log("LEAK", "✅ 1단계: setInterval 프로세스 종료 (clearInterval)");
+
+    // 2. 큰 짐 치우기: 참조 고리 끊기 (Dereferencing)
+    // 배열에 null이나 빈 배열을 할당하여 GC에게 삭제 가능함을 알림
+    leakDataStack = []; 
+    log("LEAK", "✅ 2단계: 데이터 참조 해제 (GC 신호 전송)");
+
+    statusDisplay.innerText = "Stopped & Cleaned up";
+    statusDisplay.style.color = "#1a8a3a";
+    log("LEAK", "===== 시뮬레이션 종료 및 메모리 정리 완료 =====");
+}
+
+// 이벤트 바인딩 (HTML에 해당 ID의 버튼이 있다고 가정)
+document.getElementById('leak-start-btn')?.addEventListener('click', runMemoryLeakSimulator);
+document.getElementById('leak-stop-btn')?.addEventListener('click', stopAndCleanupMemory);

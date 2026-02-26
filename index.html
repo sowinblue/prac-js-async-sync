@@ -247,7 +247,37 @@
             <div id="settled-container" class="evolution-path"></div>
         </section>
     </div>
+    <hr class="section-divider">
+    <p class="section-label">④ Memory Management — Memory Leak Simulator</p>
 
+    <div class="race-track">
+        <section id="leak-section" style="min-height: 300px;">
+            <h2 style="color: #c0392b;">④ Memory Leak Simulator</h2>
+            <p style="font-size:0.8rem; color:#888; text-align:center; margin-top:-8px;">
+                setInterval을 중단하지 않으면 어떻게 될까요?
+            </p>
+            
+            <div id="leak-status" class="status" style="font-weight: bold;">Ready...</div>
+            <div id="leak-count" class="timer" style="color: #333; font-size: 1.2rem;">누적 데이터: 0개</div>
+
+            <div class="btn-row" style="margin-top: 10px;">
+                <button id="leak-start-btn" style="background: #e74c3c; padding: 10px 20px; font-size: 0.9rem;">
+                    시뮬레이션 시작
+                </button>
+                <button id="leak-stop-btn" style="background: #27ae60; padding: 10px 20px; font-size: 0.9rem;">
+                    정지 및 메모리 정리
+                </button>
+            </div>
+            
+            <p class="console-tip" style="margin-top: 20px;">
+                💡 <b>실험 방법:</b> 시작 버튼을 누르고 콘솔 로그(F12)를 확인하세요. <br>
+                정지 버튼을 누르지 않고 다른 작업을 하면 메모리가 계속 쌓입니다.
+            </p>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
     <script src="app.js"></script>
 </body>
 </html>
